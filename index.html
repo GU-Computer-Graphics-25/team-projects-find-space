@@ -103,7 +103,8 @@
         const stars = [];     // Array to hold star objects (mesh + light)
         const settings = {
             sunIntensity: sunLight.intensity,
-            starIntensity: 0.2
+            starIntensity: 0.2,
+            sunScale: 1
         };
 
         function randFloatSpread(range) {
@@ -145,6 +146,21 @@
             sunMaterial.emissiveIntensity = value;
         });
 
+        gui.add(settings, 'sunScale', 0.1, 5).step(0.1).name('Sun Size').onChange((value) => {
+            // Scale the sun mesh
+            sunMesh.scale.set(value, value, value);
+
+            // Diminish brightness based on size
+            const adjustedIntensity = value * 1.5; // tweak this multiplier as needed
+
+            sunLight.intensity = adjustedIntensity;
+            sunMaterial.emissiveIntensity = adjustedIntensity;
+
+            // Also update the GUI value for sunIntensity to reflect the link
+            settings.sunIntensity = adjustedIntensity;
+        });
+
+
         // Star intensity control
         gui.add(settings, 'starIntensity', 0, 1).step(0.05).name('Star Intensity').onChange((value) => {
             stars.forEach(star => {
@@ -154,8 +170,8 @@
         });
 
         // Camera Position Switch Variables
-        let cameraPosition = 'thirdPerson'; 
-        let orbitalControl = false; 
+        let cameraPosition = 'thirdPerson';
+        let orbitalControl = false;
 
         // camera position based on user input
         window.addEventListener('keydown', (event) => {
@@ -167,9 +183,9 @@
                 orbitalControl = false; // Exit orbital mode
             } else if (event.key === 'o') {
                 orbitalControl = true; // Activate orbital control
-                controls.enableRotate = true; 
-                controls.enableZoom = true; 
-                controls.enablePan = true; 
+                controls.enableRotate = true;
+                controls.enableZoom = true;
+                controls.enablePan = true;
             }
         });
 
