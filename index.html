@@ -49,6 +49,31 @@
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+        // ---------------------- OBJECTs GENERATION --------------------- //
+
+        // === SUN (Visual + Light Source) === 
+        // Create sun geometry
+        const sunGeometry = new THREE.SphereGeometry(5, 64, 64);
+
+        // Material with emissive glow
+        const sunMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffaa00,              // fiery orange surface
+            emissive: 0xff6600,           // glowy center
+            emissiveIntensity: 3,
+            roughness: 0.5,
+            metalness: 0.3
+        });
+
+        const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+        sunMesh.position.set(0, 30, 0);
+        scene.add(sunMesh);
+
+        // Add a strong point light
+        const sunLight = new THREE.PointLight(0xffaa00, 2, 200);
+        sunLight.position.copy(sunMesh.position);
+        scene.add(sunLight);
+
+
         // Animation loop
         function animate() {
             requestAnimationFrame(animate);
