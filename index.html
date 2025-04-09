@@ -43,8 +43,8 @@
 
         // Camera
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 50);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(-50, 0, 50);
+        camera.lookAt(100, 30, 0);
 
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -65,7 +65,7 @@
         });
 
         const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
-        sunMesh.position.set(0, 30, 0);
+        sunMesh.position.set(100, 30, 0);
         scene.add(sunMesh);
 
         // Add a strong point light
@@ -78,7 +78,7 @@
         const planeDepth = 60;
 
         const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeDepth);
-        const planeMaterial = new THREE.MeshBasicMaterial({
+        const planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x800080,
             side: THREE.DoubleSide
         });
@@ -87,6 +87,18 @@
         playArea.rotation.x = -Math.PI / 2;
         playArea.position.y = 0;
         scene.add(playArea);
+
+        // === GUI ===
+        const gui = new dat.GUI();
+
+        const settings = {
+            sunIntensity: sunLight.intensity
+        };
+
+        gui.add(settings, 'sunIntensity', 0, 5).step(0.1).name('Sun Intensity').onChange((value) => {
+            sunLight.intensity = value;
+            sunMaterial.emissiveIntensity = value;
+        });
 
 
 
