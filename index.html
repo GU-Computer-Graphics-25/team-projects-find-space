@@ -94,6 +94,11 @@
         // === STARFIELD (Stars with lights) ===
         const starCount = 50; // Number of stars
         const stars = [];     // Array to hold star objects (mesh + light)
+        const settings = {
+            sunIntensity: sunLight.intensity,
+            starIntensity: 0.2
+        };
+
 
         function randFloatSpread(range) {
             return (Math.random() - 0.5) * range; // Helper function for random position
@@ -101,8 +106,15 @@
 
         for (let i = 0; i < starCount; i++) {
             const starGeometry = new THREE.SphereGeometry(0.5, 8, 8); // Tiny star
-            const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const starMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                emissive: 0xffffff,
+                emissiveIntensity: settings.starIntensity,
+                roughness: 1,
+                metalness: 0
+            });
             const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+
 
             // Random position within a cube of space
             const x = randFloatSpread(300); // range -150 to 150
@@ -116,24 +128,28 @@
             const starLight = new THREE.PointLight(0xffffff, 0.2, 50);
             starLight.position.copy(starMesh.position);
             scene.add(starLight);
-
-            stars.push({ mesh: starMesh, light: starLight });
+            stars.push({ mesh: starMesh, light: starLight, material: starMaterial });
         }
+
 
 
 
         // === GUI ===
         const gui = new dat.GUI();
 
-        const settings = {
-            sunIntensity: sunLight.intensity
-        };
-
+        // Sun intensity control
         gui.add(settings, 'sunIntensity', 0, 5).step(0.1).name('Sun Intensity').onChange((value) => {
             sunLight.intensity = value;
             sunMaterial.emissiveIntensity = value;
         });
 
+        // Star intensity control
+        gui.add(settings, 'starIntensity', 0, 1).step(0.05).name('Star Intensity').onChange((value) => {
+            stars.forEach(star => {
+                star.light.intensity = value;
+                star.material.emissiveIntensity = value;
+            });
+        });
 
 
         // Animation loop
