@@ -104,7 +104,8 @@
         const settings = {
             sunIntensity: sunLight.intensity,
             starIntensity: 0.2,
-            sunScale: 1
+            sunScale: 1,
+            sunSpeed: 0.01
         };
 
         function randFloatSpread(range) {
@@ -151,7 +152,7 @@
             sunMesh.scale.set(value, value, value);
 
             // Diminish brightness based on size
-            const adjustedIntensity = value * 1.5; // tweak this multiplier as needed
+            const adjustedIntensity = value * 1.5;
 
             sunLight.intensity = adjustedIntensity;
             sunMaterial.emissiveIntensity = adjustedIntensity;
@@ -160,6 +161,8 @@
             settings.sunIntensity = adjustedIntensity;
         });
 
+        // Sun speed control
+        gui.add(settings, 'sunSpeed', 0.001, 0.05).step(0.001).name('Sun Orbit Speed');
 
         // Star intensity control
         gui.add(settings, 'starIntensity', 0, 1).step(0.05).name('Star Intensity').onChange((value) => {
@@ -207,7 +210,7 @@
             requestAnimationFrame(animate);
 
             // === Animate the Sun's orbit ===
-            sunAngle += 0.01; // speed of orbit
+            sunAngle += settings.sunSpeed;
             const orbitRadius = 100;
             const centerX = 100;
             const centerZ = 0;
