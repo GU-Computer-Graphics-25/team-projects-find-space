@@ -54,9 +54,17 @@
 
         // ---------------------- OBJECTs GENERATION --------------------- //
 
+        // DEBUG ONLY TO SEE THE WHOLE SCENE 
+        // === Temporary Ambient Light ===
+        // const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // white light, low intensity
+        // scene.add(ambientLight); 
+
+
         // === SUN (Visual + Light Source) === 
         // Create sun geometry
         const sunGeometry = new THREE.SphereGeometry(5, 64, 64);
+        let sunAngle = 0; // in radians
+
 
         // Material with emissive glow
         const sunMaterial = new THREE.MeshStandardMaterial({
@@ -76,6 +84,8 @@
         sunLight.position.copy(sunMesh.position);
         scene.add(sunLight);
 
+
+
         // === PURPLE PLAY AREA (Flat face for visual guide) ===
         const planeWidth = 110;
         const planeDepth = 60;
@@ -90,6 +100,8 @@
         playArea.rotation.x = -Math.PI / 2;
         playArea.position.y = 0;
         scene.add(playArea);
+
+
 
         // === STARFIELD (Stars with lights) ===
         const starCount = 50; // Number of stars
@@ -155,6 +167,23 @@
         // Animation loop
         function animate() {
             requestAnimationFrame(animate);
+
+            // === Animate the Sun's orbit ===
+            sunAngle += 0.01; // speed of orbit
+
+            // Circle radius and center
+            const orbitRadius = 100;
+            const centerX = 100;
+            const centerZ = 0;
+
+            const sunX = centerX;
+            const sunY = Math.sin(sunAngle) * orbitRadius + 10;
+            const sunZ = Math.cos(sunAngle) * orbitRadius;
+
+            sunMesh.position.set(sunX, sunY, sunZ);
+            sunLight.position.copy(sunMesh.position);
+
+            // Render scene
             renderer.render(scene, camera);
         }
         animate();
