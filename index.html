@@ -73,6 +73,22 @@
         sunLight.position.copy(sunMesh.position);
         scene.add(sunLight);
 
+        // === PURPLE PLAY AREA (Flat face for visual guide) ===
+        const planeWidth = 110;
+        const planeDepth = 60;
+
+        const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeDepth);
+        const planeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x800080,
+            side: THREE.DoubleSide
+        });
+
+        const playArea = new THREE.Mesh(planeGeometry, planeMaterial);
+        playArea.rotation.x = -Math.PI / 2;
+        playArea.position.y = 0;
+        scene.add(playArea);
+
+
 
         // Animation loop
         function animate() {
