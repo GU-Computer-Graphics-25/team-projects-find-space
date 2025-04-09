@@ -25,6 +25,10 @@
 
 <body>
     <script>
+        // Camera Positions
+        const thirdPersonView = new THREE.Vector3(150, 50, -150); // third-person 
+        const cockpitView = new THREE.Vector3(0, 10, 25); // cockpit view 
+
         // Create scene
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000000); // black space
@@ -43,11 +47,8 @@
 
         // Camera
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(100, 50, -100);
+        camera.position.set(150, 50, -150); // Set default to third-person view
         camera.lookAt(100, 0, 0);
-
-
-
 
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -59,12 +60,10 @@
         // const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // white light, low intensity
         // scene.add(ambientLight); 
 
-
         // === SUN (Visual + Light Source) === 
         // Create sun geometry
         const sunGeometry = new THREE.SphereGeometry(5, 64, 64);
         let sunAngle = 0; // in radians
-
 
         // Material with emissive glow
         const sunMaterial = new THREE.MeshStandardMaterial({
@@ -84,8 +83,6 @@
         sunLight.position.copy(sunMesh.position);
         scene.add(sunLight);
 
-
-
         // === PURPLE PLAY AREA (Flat face for visual guide) ===
         const planeWidth = 110;
         const planeDepth = 60;
@@ -101,8 +98,6 @@
         playArea.position.y = 0;
         scene.add(playArea);
 
-
-
         // === STARFIELD (Stars with lights) ===
         const starCount = 50; // Number of stars
         const stars = [];     // Array to hold star objects (mesh + light)
@@ -110,7 +105,6 @@
             sunIntensity: sunLight.intensity,
             starIntensity: 0.2
         };
-
 
         function randFloatSpread(range) {
             return (Math.random() - 0.5) * range; // Helper function for random position
@@ -127,7 +121,6 @@
             });
             const starMesh = new THREE.Mesh(starGeometry, starMaterial);
 
-
             // Random position within a cube of space
             const x = randFloatSpread(300); // range -150 to 150
             const y = randFloatSpread(200) + 20; // keep them mostly above
@@ -142,9 +135,6 @@
             scene.add(starLight);
             stars.push({ mesh: starMesh, light: starLight, material: starMaterial });
         }
-
-
-
 
         // === GUI ===
         const gui = new dat.GUI();
@@ -163,6 +153,38 @@
             });
         });
 
+        // Camera Position Switch Variables
+        let cameraPosition = 'thirdPerson'; 
+        let orbitalControl = false; 
+
+        // camera position based on user input
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'v') {
+                cameraPosition = 'thirdPerson';
+                orbitalControl = false; // Exit orbital mode
+            } else if (event.key === 'c') {
+                cameraPosition = 'cockpit';
+                orbitalControl = false; // Exit orbital mode
+            } else if (event.key === 'o') {
+                orbitalControl = true; // Activate orbital control
+                controls.enableRotate = true; 
+                controls.enableZoom = true; 
+                controls.enablePan = true; 
+            }
+        });
+
+        // update camera position
+        function updateCameraPosition() {
+            if (cameraPosition === 'thirdPerson') {
+                camera.position.copy(thirdPersonView);
+                camera.lookAt(sunMesh.position);
+                controls.target.copy(sunMesh.position); // Ensure controls target follow the sun
+            } else if (cameraPosition === 'cockpit') {
+                camera.position.copy(cockpitView);
+                camera.lookAt(sunMesh.position);
+                controls.target.copy(sunMesh.position); // Ensure controls target follow the sun
+            }
+        }
 
         // Animation loop
         function animate() {
@@ -170,8 +192,6 @@
 
             // === Animate the Sun's orbit ===
             sunAngle += 0.01; // speed of orbit
-
-            // Circle radius and center
             const orbitRadius = 100;
             const centerX = 100;
             const centerZ = 0;
@@ -183,9 +203,18 @@
             sunMesh.position.set(sunX, sunY, sunZ);
             sunLight.position.copy(sunMesh.position);
 
+            // Update Camera Position based on the selected view
+            if (!orbitalControl) {
+                updateCameraPosition();
+            }
+
+            // Update controls
+            controls.update(); // Only needed if controls.enableDamping or controls.auto-rotation is enabled
+
             // Render scene
             renderer.render(scene, camera);
         }
+
         animate();
     </script>
 </body>
