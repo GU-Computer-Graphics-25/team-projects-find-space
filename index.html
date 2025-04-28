@@ -57,6 +57,9 @@
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+        const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
+scene.add(light);
+
         // ---------------------- OBJECTs GENERATION --------------------- //
 
         // DEBUG ONLY TO SEE THE WHOLE SCENE 
@@ -128,8 +131,73 @@ const backSphere = new THREE.Mesh(backSphereGeometry, reactor);
 backSphere.position.set(-9, 0, 0); // Move to the back
 spaceship.add(backSphere);
 
+// === BIG WINGS (Rectangular style) ===
+
+const wingMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.6, roughness: 0.3 });
+
+// bottom1 right win
+const leftWingGeometry = new THREE.BoxGeometry(20, 1, 4); // width, height, depth
+const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
+leftWing.position.set(-5, 0, 5.5); 
+leftWing.rotation.y = Math.PI / 4; // slight angle
+spaceship.add(leftWing);
+
+// bottom1 left Wing
+const rightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial.clone());
+rightWing.position.set(-5, 0, -5.5);
+rightWing.rotation.y =  -Math.PI / 4; // mirror angle
+spaceship.add(rightWing);
+
+
+// Bottom2 right wing
+const bottomRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const bottomRightWing = new THREE.Mesh(bottomRightWingGeometry, wingMaterial);
+bottomRightWing.position.set(-5, -2, 5.5); 
+bottomRightWing.rotation.y = Math.PI / 4; // 45 degrees
+spaceship.add(bottomRightWing);
+
+// Bottom2 left wing
+const bottomLeftWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const bottomLeftWing = new THREE.Mesh(bottomLeftWingGeometry, wingMaterial.clone());
+bottomLeftWing.position.set(-5, -2, -5.5);
+bottomLeftWing.rotation.y = -Math.PI / 4; // -45 degrees
+spaceship.add(bottomLeftWing);
+
+// === FRONT SET OF WINGS ===
+
+const frontWingMaterial = new THREE.MeshStandardMaterial({ color: 0xffaa00, metalness: 0.6, roughness: 0.3 }); // different color if you want
+
+// Front bottom right wing
+const frontBottomRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const frontBottomRightWing = new THREE.Mesh(frontBottomRightWingGeometry, frontWingMaterial);
+frontBottomRightWing.position.set(5, -2, 5.5); // moved to front (x = +5)
+frontBottomRightWing.rotation.y = Math.PI / 4;
+spaceship.add(frontBottomRightWing);
+
+// Front bottom left wing
+const frontBottomLeftWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const frontBottomLeftWing = new THREE.Mesh(frontBottomLeftWingGeometry, frontWingMaterial.clone());
+frontBottomLeftWing.position.set(5, -2, -5.5);
+frontBottomLeftWing.rotation.y = -Math.PI / 4;
+spaceship.add(frontBottomLeftWing);
+
+// Front top right wing
+const frontTopRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const frontTopRightWing = new THREE.Mesh(frontTopRightWingGeometry, frontWingMaterial.clone());
+frontTopRightWing.position.set(5, 2, 5.5);
+frontTopRightWing.rotation.y = Math.PI / 4;
+spaceship.add(frontTopRightWing);
+
+// Front top left wing
+const frontTopLeftWingGeometry = new THREE.BoxGeometry(20, 1, 4);
+const frontTopLeftWing = new THREE.Mesh(frontTopLeftWingGeometry, frontWingMaterial.clone());
+frontTopLeftWing.position.set(5, 2, -5.5);
+frontTopLeftWing.rotation.y = -Math.PI / 4;
+spaceship.add(frontTopLeftWing);
+
 // Set spaceship initial position above the ground
-spaceship.position.set(0, 3, 0);
+spaceship.position.set(0, 6, 0);
 
 // Add spaceship to scene
 scene.add(spaceship);
