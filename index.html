@@ -57,8 +57,8 @@
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-        const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
-scene.add(light);
+     //   const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
+//scene.add(light);
 
         // ---------------------- OBJECTs GENERATION --------------------- //
 
@@ -120,7 +120,7 @@ spaceship.add(body);
 const reactor = new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.5, roughness: 0.2 });
 
 // Front hemisphere
-const frontSphereGeometry = new THREE.SphereGeometry(3, 48, 48);
+const frontSphereGeometry = new THREE.SphereGeometry(3.5, 48, 48);
 const frontSphere = new THREE.Mesh(frontSphereGeometry, bodyMaterial);
 frontSphere.position.set(9, 0, 0); // Move to the front
 spaceship.add(frontSphere);
@@ -171,30 +171,44 @@ const frontWingMaterial = new THREE.MeshStandardMaterial({ color: 0xffaa00, meta
 // Front bottom right wing
 const frontBottomRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
 const frontBottomRightWing = new THREE.Mesh(frontBottomRightWingGeometry, frontWingMaterial);
-frontBottomRightWing.position.set(5, -2, 5.5); // moved to front (x = +5)
+frontBottomRightWing.position.set(3, -2, 5.5); // moved to front (x = +5)
 frontBottomRightWing.rotation.y = Math.PI / 4;
 spaceship.add(frontBottomRightWing);
 
 // Front bottom left wing
 const frontBottomLeftWingGeometry = new THREE.BoxGeometry(20, 1, 4);
 const frontBottomLeftWing = new THREE.Mesh(frontBottomLeftWingGeometry, frontWingMaterial.clone());
-frontBottomLeftWing.position.set(5, -2, -5.5);
+frontBottomLeftWing.position.set(3, -2, -5.5);
 frontBottomLeftWing.rotation.y = -Math.PI / 4;
 spaceship.add(frontBottomLeftWing);
 
 // Front top right wing
 const frontTopRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
 const frontTopRightWing = new THREE.Mesh(frontTopRightWingGeometry, frontWingMaterial.clone());
-frontTopRightWing.position.set(5, 2, 5.5);
+frontTopRightWing.position.set(3, 2, 5.5);
 frontTopRightWing.rotation.y = Math.PI / 4;
 spaceship.add(frontTopRightWing);
 
 // Front top left wing
 const frontTopLeftWingGeometry = new THREE.BoxGeometry(20, 1, 4);
 const frontTopLeftWing = new THREE.Mesh(frontTopLeftWingGeometry, frontWingMaterial.clone());
-frontTopLeftWing.position.set(5, 2, -5.5);
+frontTopLeftWing.position.set(3, 2, -5.5);
 frontTopLeftWing.rotation.y = -Math.PI / 4;
 spaceship.add(frontTopLeftWing);
+
+// === NOSE CONE (fixed orientation) ===
+
+const noseMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3 });
+
+const noseGeometry = new THREE.ConeGeometry(3.8, 6, 32); // radius, height, segments
+const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+
+// FIX ROTATION
+nose.rotation.z = -Math.PI / 2; // NEGATIVE 90 degrees
+nose.position.set(12, 0, 0); // Move it forward
+
+spaceship.add(nose);
+
 
 // Set spaceship initial position above the ground
 spaceship.position.set(0, 6, 0);
