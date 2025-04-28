@@ -21,10 +21,14 @@
     <script src="./js/OrbitControls.js"></script>
     <script src="./js/SceneUtils.js"></script>
     <script src="./js/dat.gui.js"></script>
+
+
+
 </head>
 
 <body>
     <script>
+        
         // Camera Positions
         const thirdPersonView = new THREE.Vector3(150, 50, -150); // third-person 
         const cockpitView = new THREE.Vector3(0, 10, 25); // cockpit view 
@@ -97,6 +101,40 @@
         playArea.rotation.x = -Math.PI / 2;
         playArea.position.y = 0;
         scene.add(playArea);
+
+// === SPACESHIP BASE ===
+
+// Create a group to hold the spaceship parts
+const spaceship = new THREE.Group();
+
+// Main cylinder body
+const bodyGeometry = new THREE.CylinderGeometry(6, 3, 18, 48); // radiusTop, radiusBottom, height, radialSegments
+const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.7, roughness: 0.3 });
+const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+body.rotation.z = Math.PI / 2; // rotate horizontally
+spaceship.add(body);
+
+const reactor = new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.5, roughness: 0.2 });
+
+// Front hemisphere
+const frontSphereGeometry = new THREE.SphereGeometry(3, 48, 48);
+const frontSphere = new THREE.Mesh(frontSphereGeometry, bodyMaterial);
+frontSphere.position.set(9, 0, 0); // Move to the front
+spaceship.add(frontSphere);
+
+// Back hemisphere
+const backSphereGeometry = new THREE.SphereGeometry(3, 48, 48);
+const backSphere = new THREE.Mesh(backSphereGeometry, reactor);
+backSphere.position.set(-9, 0, 0); // Move to the back
+spaceship.add(backSphere);
+
+// Set spaceship initial position above the ground
+spaceship.position.set(0, 3, 0);
+
+// Add spaceship to scene
+scene.add(spaceship);
+
+
 
         // === STARFIELD (Stars with lights) ===
         const starCount = 50; // Number of stars
