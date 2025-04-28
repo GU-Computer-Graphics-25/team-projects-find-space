@@ -31,7 +31,7 @@
 
         // Camera Positions
         const thirdPersonView = new THREE.Vector3(150, 50, -150); // third-person 
-        const cockpitView = new THREE.Vector3(0, 10, 25); // cockpit view 
+
 
         // Create scene
         const scene = new THREE.Scene();
@@ -64,8 +64,8 @@
         const noseTexture = textureLoader.load('texture-of-tank-side-wall-made-of-metal-and-reinforced-with-a-multitude-of-bolts-and-rivets-photo (1).jpg');
 
 
-       //   const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
-        //  scene.add(light);
+        const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
+        scene.add(light);
 
         // ---------------------- OBJECTs GENERATION --------------------- //
 
@@ -232,10 +232,12 @@
             opacity: 0.4
         });
 
-      
+
         // Create the cockpit mesh
         const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-        cockpit.scale.set(2, 0.8, 1.2);
+
+
+        cockpit.scale.set(2, 1.5, 1.2);
 
         // Position cockpit on top of the body
         cockpit.position.set(0, 3, 0);
@@ -349,13 +351,30 @@
         // update camera position
         function updateCameraPosition() {
             if (cameraPosition === 'thirdPerson') {
-                camera.position.copy(thirdPersonView);
-                camera.lookAt(sunMesh.position);
-                controls.target.copy(sunMesh.position); // Ensure controls target follow the sun
+                // Third-person: follow spaceship nicely
+                const offsetBehind = 80; // distance behind the ship
+                const offsetAbove = 60;  // height above the ship
+
+                // Set camera position relative to the spaceship
+                camera.position.set(
+                    spaceship.position.x - offsetBehind,
+                    spaceship.position.y + offsetAbove,
+                    spaceship.position.z
+                );
+
+                // Look at where the ship is pointing
+                camera.lookAt(spaceship.position.x + 20, spaceship.position.y, spaceship.position.z);
+
+                controls.target.set(
+                    spaceship.position.x + 20,
+                    spaceship.position.y,
+                    spaceship.position.z
+                );
             } else if (cameraPosition === 'cockpit') {
-                camera.position.copy(cockpitView);
-                camera.lookAt(sunMesh.position);
-                controls.target.copy(sunMesh.position); // Ensure controls target follow the sun
+                // Move camera to inside the cockpit
+                camera.position.set(-5, 12.5, 0);
+                camera.lookAt(15, 20, 0);
+                controls.target.set(20, 10, 0); // Look straight ahead along the X axis
             }
         }
 
