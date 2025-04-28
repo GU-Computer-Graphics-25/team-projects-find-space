@@ -56,6 +56,9 @@
 
         // Orbit controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        let moveLeft = false;
+        let moveRight = false;
+
 
         //textures
         const textureLoader = new THREE.TextureLoader();
@@ -334,17 +337,32 @@
 
         // camera position based on user input
         window.addEventListener('keydown', (event) => {
-            if (event.key === 'v') {
+            if (event.key === 'a' || event.key === 'A') {
+                moveLeft = true;
+            }
+            if (event.key === 'd' || event.key === 'D') {
+                moveRight = true;
+            }
+            if (event.key === 'v' || event.key === 'V') {
                 cameraPosition = 'thirdPerson';
                 orbitalControl = false; // Exit orbital mode
-            } else if (event.key === 'c') {
+            } else if (event.key === 'c' || event.key === 'C') {
                 cameraPosition = 'cockpit';
                 orbitalControl = false; // Exit orbital mode
-            } else if (event.key === 'o') {
+            } else if (event.key === 'o' || event.key === 'O') {
                 orbitalControl = true; // Activate orbital control
                 controls.enableRotate = true;
                 controls.enableZoom = true;
                 controls.enablePan = true;
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            if (event.key === 'a' || event.key === 'A') {
+                moveLeft = false;
+            }
+            if (event.key === 'd' || event.key === 'D') {
+                moveRight = false;
             }
         });
 
@@ -371,10 +389,24 @@
                     spaceship.position.z
                 );
             } else if (cameraPosition === 'cockpit') {
-                // Move camera to inside the cockpit
-                camera.position.set(-5, 12.5, 0);
-                camera.lookAt(15, 20, 0);
-                controls.target.set(20, 10, 0); // Look straight ahead along the X axis
+                // Move camera to relative inside position
+                camera.position.set(
+                    spaceship.position.x -9,    // Slightly inside nose
+                    spaceship.position.y + 7,   // Inside the cockpit dome
+                    spaceship.position.z         // Centered left-right
+                );
+
+                camera.lookAt(
+                    spaceship.position.x + 20,   // Look forward along X axis
+                    spaceship.position.y -5,   // Stay level at cockpit height
+                    spaceship.position.z
+                );
+
+                controls.target.set(
+                    spaceship.position.x + 20,
+                    spaceship.position.y + 10,
+                    spaceship.position.z
+                );
             }
         }
 
@@ -399,6 +431,16 @@
             if (!orbitalControl) {
                 updateCameraPosition();
             }
+
+            const moveSpeed = 0.5; // how fast to move
+
+            if (moveLeft) {
+                spaceship.position.z += moveSpeed;
+            }
+            if (moveRight) {
+                spaceship.position.z -= moveSpeed;
+            }
+
 
             // Update controls
             controls.update(); // Only needed if controls.enableDamping or controls.auto-rotation is enabled
