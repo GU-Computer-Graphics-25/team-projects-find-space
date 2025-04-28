@@ -64,8 +64,8 @@
         const noseTexture = textureLoader.load('texture-of-tank-side-wall-made-of-metal-and-reinforced-with-a-multitude-of-bolts-and-rivets-photo (1).jpg');
 
 
-      //  const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
-      //  scene.add(light);
+       //   const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
+        //  scene.add(light);
 
         // ---------------------- OBJECTs GENERATION --------------------- //
 
@@ -140,7 +140,7 @@
 
         // === BIG WINGS (Rectangular style) ===
 
-        const wingMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF,map: wingTexture, metalness: 0.6, roughness: 0.3 });
+        const wingMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, map: wingTexture, metalness: 0.6, roughness: 0.3 });
 
         // bottom1 right win
         const leftWingGeometry = new THREE.BoxGeometry(20, 1, 4); // width, height, depth
@@ -173,7 +173,7 @@
 
         // === FRONT SET OF WINGS ===
 
-        const frontWingMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF,map: wingTexture, metalness: 0.6, roughness: 0.3 }); 
+        const frontWingMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, map: wingTexture, metalness: 0.6, roughness: 0.3 });
 
         // Front bottom right wing
         const frontBottomRightWingGeometry = new THREE.BoxGeometry(20, 1, 4);
@@ -205,7 +205,7 @@
 
         // === NOSE CONE (fixed orientation) ===
 
-        const noseMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF,map: noseTexture, metalness: 0.6, roughness: 0.3 });
+        const noseMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, map: noseTexture, metalness: 0.6, roughness: 0.3 });
 
         const noseGeometry = new THREE.ConeGeometry(3.8, 6, 32); // radius, height, segments
         const nose = new THREE.Mesh(noseGeometry, noseMaterial);
@@ -215,6 +215,33 @@
         nose.position.set(12, 0, 0); // Move it forward
 
         spaceship.add(nose);
+
+        // === COCKPIT DOME ===
+
+        // Cockpit geometry: half sphere
+        const cockpitGeometry = new THREE.SphereGeometry(3, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+        // (radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength)
+        // Note: thetaLength = Math.PI/2 → only top half of sphere
+
+        // Cockpit material: transparent glass
+        const cockpitMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00aaff,
+            metalness: 0.5,
+            roughness: 0.1,
+            transparent: true,
+            opacity: 0.4
+        });
+
+      
+        // Create the cockpit mesh
+        const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
+        cockpit.scale.set(2, 0.8, 1.2);
+
+        // Position cockpit on top of the body
+        cockpit.position.set(0, 3, 0);
+        // (x=0 center, y=3 to sit nicely on top, z=0 center)
+
+        spaceship.add(cockpit);
 
 
         // Set spaceship initial position above the ground
