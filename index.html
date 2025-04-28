@@ -59,6 +59,12 @@
         let moveLeft = false;
         let moveRight = false;
 
+        let targetTilt = 0;      // target tilt we want (in radians)
+        let currentTilt = 0;     // current tilt value (in radians)
+        const tiltSpeed = 0.02;  // how fast the ship tilts
+        const maxTilt = Math.PI / 8; // about 22 degrees max tilt
+
+
 
         //textures
         const textureLoader = new THREE.TextureLoader();
@@ -391,14 +397,14 @@
             } else if (cameraPosition === 'cockpit') {
                 // Move camera to relative inside position
                 camera.position.set(
-                    spaceship.position.x -9,    // Slightly inside nose
+                    spaceship.position.x - 9,    // Slightly inside nose
                     spaceship.position.y + 7,   // Inside the cockpit dome
                     spaceship.position.z         // Centered left-right
                 );
 
                 camera.lookAt(
                     spaceship.position.x + 20,   // Look forward along X axis
-                    spaceship.position.y -5,   // Stay level at cockpit height
+                    spaceship.position.y - 5,   // Stay level at cockpit height
                     spaceship.position.z
                 );
 
@@ -432,15 +438,33 @@
                 updateCameraPosition();
             }
 
-            const moveSpeed = 0.5; // how fast to move
-
+            const moveSpeed = 0.5;
             if (moveLeft) {
-                spaceship.position.z += moveSpeed;
-            }
-            if (moveRight) {
                 spaceship.position.z -= moveSpeed;
             }
+            if (moveRight) {
+                spaceship.position.z += moveSpeed;
+            }
 
+            // Tilt spaceship
+            if (moveLeft) {
+                targetTilt = -maxTilt;
+            } else if (moveRight) {
+                targetTilt = maxTilt;
+            } else {
+                targetTilt = 0;
+            }
+            currentTilt += (targetTilt - currentTilt) * tiltSpeed;
+            spaceship.rotation.x = currentTilt;
+
+            // Update camera based on current view
+            if (!orbitalControl) {
+                updateCameraPosition();
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+            ;
 
             // Update controls
             controls.update(); // Only needed if controls.enableDamping or controls.auto-rotation is enabled
