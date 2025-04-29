@@ -506,6 +506,11 @@
             planetsVisible = visible;
         }
 
+        // === HITBOXES ===
+        // === SPACESHIP HITBOX ===
+        const box = new THREE.Box3().setFromObject(spaceship);
+        const helper = new THREE.Box3Helper(box, 0x00ff00); // green wireframe
+        scene.add(helper);
 
 
 
@@ -643,6 +648,8 @@
         // Animation loop
         function animate() {
             requestAnimationFrame(animate);
+
+            box.setFromObject(spaceship); // updates the hitbox box based on spaceship position
 
             // === Animate the Sun's orbit ===
             sunAngle += settings.sunSpeed;
