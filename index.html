@@ -268,61 +268,77 @@
         let asteroids = [];
         let canSpawn = true;
 
-        function createAsteroid(radius = 5, detail = 1) {
+        function createAsteroid(radius = 4, detail = 1) {
             const geometry = new THREE.IcosahedronGeometry(radius, detail);
 
+            // Make it rocky and bumpy
             const displacementStrength = 1;
-
             for (let i = 0; i < geometry.vertices.length; i++) {
                 const vertex = geometry.vertices[i];
-
                 vertex.x += (Math.random() - 0.5) * displacementStrength;
                 vertex.y += (Math.random() - 0.5) * displacementStrength;
                 vertex.z += (Math.random() - 0.5) * displacementStrength;
             }
 
-            geometry.computeFlatVertexNormals(); // recalculate normals for correct lighting
+            geometry.computeFlatVertexNormals();
 
             const material = new THREE.MeshStandardMaterial({
+                map: asteroidTexture, // you already loaded 'asteroidTexture' earlier
                 roughness: 1,
-                map: asteroidTexture,
                 metalness: 0.2
-
             });
 
             return new THREE.Mesh(geometry, material);
         }
 
-        function spawnAsteroid() {
-            if (!canSpawn) return;
 
-            const asteroid = createAsteroid(3, 1);
+        function createOneAsteroid(offsetZ = 0) {
+            // 10% chance to create a BIG asteroid
+            const isBig = Math.random() < 0.1;
 
-            const randomZ = (Math.random() - 0.5) * 150; // side to side
+            const size = isBig ? 8 : 4;       // big = 8, normal = 4
+            const speed = isBig ? 0.2 : 1;     // big = slow, normal = fast
+
+            const asteroid = createAsteroid(size, 1); // << your createAsteroid(radius, detail) function
+
+            const randomZ = (Math.random() - 0.5) * 150; // random side
             const startY = 30;
-            const startX = spaceship.position.x + 150;
+            const startX = spaceship.position.x + 150;   // spawn ahead of ship
 
             asteroid.position.set(startX, startY, randomZ);
 
             const targetPosition = new THREE.Vector3(
                 spaceship.position.x,
                 spaceship.position.y,
-                spaceship.position.z
+                spaceship.position.z + offsetZ
             );
 
-            // Precompute direction vector
             const direction = new THREE.Vector3().subVectors(targetPosition, asteroid.position).normalize();
 
             asteroid.userData = {
-                direction: direction, // <== save this!
-                speed: 0.5
+                direction: direction,
+                speed: speed
             };
 
             scene.add(asteroid);
             asteroids.push(asteroid);
+        }
+
+
+        function spawnAsteroid() {
+            if (!canSpawn) return;
+
+            createOneAsteroid(); // Always spawn 1
+
+            if (Math.random() < 0.2) {
+                // 20% chance to spawn a second asteroid
+                const offsetAmount = 15; // Side offset
+                const offsetZ = (Math.random() < 0.5 ? -1 : 1) * offsetAmount; // -15 or +15
+                createOneAsteroid(offsetZ); // spawn a second asteroid with offset
+            }
 
             canSpawn = false;
-            setTimeout(() => { canSpawn = true; }, 1500);
+            setTimeout(() => { canSpawn = true; }, 1500); // 1.5 sec cooldown
         }
 
 
