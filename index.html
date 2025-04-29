@@ -484,24 +484,28 @@
 
 
         const planets = [];
+        let planetsVisible = false;
 
-        function spawnPlanets() {
-            for (let i = 0; i < 10; i++) {
-                let x, y, z;
+        function togglePlanets(visible) {
+            if (visible && planets.length === 0) {
+                // Spawn only once
+                for (let i = 0; i < 10; i++) {
+                    let x, y, z;
+                    do {
+                        x = randFloatSpread(900);
+                        y = randFloatSpread(900);
+                        z = randFloatSpread(900);
+                    } while (Math.abs(x) < 200 && Math.abs(z) < 200);
 
-                do {
-                    x = randFloatSpread(900);
-                    y = randFloatSpread(900);
-                    z = randFloatSpread(900);
-
-                    // Make sure planets are not too close to the play area
-                } while (Math.abs(x) < 200 && Math.abs(z) < 200);
-
-                const planet = createPlanet(x, y, z);
-                planets.push(planet);
+                    const planet = createPlanet(x, y, z);
+                    planets.push(planet);
+                }
             }
+
+            planets.forEach(p => p.visible = visible);
+            planetsVisible = visible;
         }
-        spawnPlanets();
+
 
 
 
@@ -538,6 +542,14 @@
                 star.material.emissiveIntensity = value;
             });
         });
+
+        //show planets toggle GUI
+        const visibilitySettings = { showPlanets: false };
+
+        gui.add(visibilitySettings, 'showPlanets').name("Show Planets").onChange((value) => {
+            togglePlanets(value);
+        });
+
 
         // Camera Position Switch Variables
         let cameraPosition = 'thirdPerson';
@@ -693,7 +705,7 @@
             currentTilt += (targetTilt - currentTilt) * tiltSpeed;
             spaceship.rotation.x = currentTilt;
 
-            // === 🚀 Reactor Glow Logic ===
+            // === Reactor Glow Logic ===
             if (moveLeft || moveRight) {
                 targetGlow = 5.0; // intense glow when moving
             } else {
