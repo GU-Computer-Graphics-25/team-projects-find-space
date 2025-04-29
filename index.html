@@ -17,7 +17,6 @@
 
     <!-- Core Libraries -->
     <script src="./js/three.js"></script>
-    <script src="./js/tw.js"></script>
     <script src="./js/OrbitControls.js"></script>
     <script src="./js/SceneUtils.js"></script>
     <script src="./js/dat.gui.js"></script>
@@ -58,6 +57,9 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         let moveLeft = false;
         let moveRight = false;
+        let reactorGlow = 0.2; // initial glow
+        let targetGlow = 0.2;
+
 
         let targetTilt = 0;      // target tilt we want (in radians)
         let currentTilt = 0;     // current tilt value (in radians)
@@ -140,7 +142,13 @@
         body.rotation.z = Math.PI / 2; // rotate horizontally
         spaceship.add(body);
 
-        const reactor = new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.5, roughness: 0.2 });
+        const reactorMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFF0000,
+            emissive: new THREE.Color(0x220000), // dark red
+            emissiveIntensity: 1.0,
+            metalness: 0.5,
+            roughness: 0.2
+        });
 
         // Front hemisphere
         const frontSphereGeometry = new THREE.SphereGeometry(3.5, 48, 48);
@@ -150,7 +158,7 @@
 
         // Back hemisphere
         const backSphereGeometry = new THREE.SphereGeometry(3, 48, 48);
-        const backSphere = new THREE.Mesh(backSphereGeometry, reactor);
+        const backSphere = new THREE.Mesh(backSphereGeometry, reactorMaterial);
         backSphere.position.set(-9, 0, 0); // Move to the back
         spaceship.add(backSphere);
 
@@ -352,7 +360,7 @@
         const spaceMaterial = new THREE.MeshBasicMaterial({
             map: spaceTexture,
             side: THREE.BackSide, //render inside of sphere
-            color: new THREE.Color(0x222222) // dark grey multiplier
+            color: new THREE.Color(0x998e88) // dark grey multiplier
 
         });
 
@@ -564,6 +572,16 @@
             if (event.key === 'd' || event.key === 'D') {
                 moveRight = false;
             }
+            if (moveLeft || moveRight) {
+                targetGlow = 4.0; // maximum glow
+            } else {
+                targetGlow = 0.2; // resting glow
+            }
+
+            // Smooth transition
+            reactorGlow += (targetGlow - reactorGlow) * 0.05;
+            reactorMaterial.emissiveIntensity = reactorGlow;
+
         });
 
         // update camera position
@@ -628,7 +646,7 @@
             sunLight.position.copy(sunMesh.position);
 
             // Randomly decide to spawn asteroid
-            if (Math.random() < 0.01) { // about 1% chance each frame
+            if (Math.random() < 0.01) {
                 spawnAsteroid();
             }
 
@@ -637,21 +655,19 @@
                 asteroid.position.add(asteroid.userData.direction.clone().multiplyScalar(asteroid.userData.speed));
             });
 
-            //remove asteroids when out of sight
+            // Remove out-of-view asteroids
             for (let i = asteroids.length - 1; i >= 0; i--) {
                 const asteroid = asteroids[i];
                 if (asteroid.position.x < spaceship.position.x - 200) {
-                    // If asteroid is way behind the ship (200 units past), remove it
                     scene.remove(asteroid);
                     asteroids.splice(i, 1);
                 }
             }
 
-            // Sky box rotation
+            // Skybox rotation
             spaceSphere.rotation.y += 0.0001;
 
-
-            // Update Camera Position based on the selected view
+            // Update Camera Position
             if (!orbitalControl) {
                 updateCameraPosition();
             }
@@ -659,15 +675,11 @@
             const moveSpeed = 0.5;
             const halfPlaneDepth = 100;
 
-            if (moveLeft) {
-                if (spaceship.position.z - moveSpeed > -halfPlaneDepth) {
-                    spaceship.position.z -= moveSpeed;
-                }
+            if (moveLeft && spaceship.position.z - moveSpeed > -halfPlaneDepth) {
+                spaceship.position.z -= moveSpeed;
             }
-            if (moveRight) {
-                if (spaceship.position.z + moveSpeed < halfPlaneDepth) {
-                    spaceship.position.z += moveSpeed;
-                }
+            if (moveRight && spaceship.position.z + moveSpeed < halfPlaneDepth) {
+                spaceship.position.z += moveSpeed;
             }
 
             // Tilt spaceship
@@ -680,6 +692,16 @@
             }
             currentTilt += (targetTilt - currentTilt) * tiltSpeed;
             spaceship.rotation.x = currentTilt;
+
+            // === 🚀 Reactor Glow Logic ===
+            if (moveLeft || moveRight) {
+                targetGlow = 5.0; // intense glow when moving
+            } else {
+                targetGlow = 0.2; // cool down
+            }
+
+            reactorGlow += (targetGlow - reactorGlow) * 0.05;
+            reactorMaterial.emissiveIntensity = reactorGlow;
 
             // Animate planet particle rings
             planets.forEach(planet => {
@@ -697,24 +719,10 @@
                     );
                 });
 
-                // Spin the whole ring slowly
-                planet.children[1].rotation.z += 0.001; // assuming ring is second child
+                planet.children[1].rotation.z += 0.001;
             });
 
-
-            // Update camera based on current view
-            if (!orbitalControl) {
-                updateCameraPosition();
-            }
-
             controls.update();
-            renderer.render(scene, camera);
-            ;
-
-            // Update controls
-            controls.update(); // Only needed if controls.enableDamping or controls.auto-rotation is enabled
-
-            // Render scene
             renderer.render(scene, camera);
         }
 
