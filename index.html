@@ -13,6 +13,50 @@
         canvas {
             display: block;
         }
+
+        #gameOverMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #00ffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 60px;
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 4px solid #00ffff;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        #gameOverMessage p {
+            font-size: 30px;
+            margin-top: 20px;
+            color: #ff00ff;
+        }
+
+        #tryAgainButton {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            padding: 12px 24px;
+            font-size: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #111122;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #tryAgainButton:hover {
+            background-color: #222233;
+            color: #ffffff;
+            border-color: #ffffff;
+        }
     </style>
 
     <!-- Core Libraries -->
@@ -26,6 +70,11 @@
 </head>
 
 <body>
+    <div id="gameOverMessage" style="display: none;">
+        <h1>🚀 GAME OVER 🚀</h1>
+        <p>Lost in Space...</p>
+        <button id="tryAgainButton">Try Again</button>
+    </div>
     <script>
 
         // Camera Positions
@@ -61,7 +110,9 @@
         let moveRight = false;
         let reactorGlow = 0.2; // initial glow
         let targetGlow = 0.2;
-        
+        let gameOver = false;
+
+
 
 
         let targetTilt = 0;      // target tilt we want (in radians)
@@ -673,9 +724,21 @@
 
         // Animation loop
         function animate() {
+            if (gameOver) return; // if lost, stop updating
+
             requestAnimationFrame(animate);
 
             box.setFromObject(spaceship); // updates the hitbox box based on spaceship position
+            // Check collision between spaceship and each asteroid
+            for (let i = 0; i < asteroidHitboxes.length; i++) {
+                if (box.intersectsBox(asteroidHitboxes[i].bbox)) {
+                    console.log("Collision detected! Game over.");
+                    document.getElementById('gameOverMessage').style.display = 'block';
+                    gameOver = true;
+                    break;
+                }
+            }
+
 
             // === Animate the Sun's orbit ===
             sunAngle += settings.sunSpeed;
