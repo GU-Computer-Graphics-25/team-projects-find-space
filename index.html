@@ -307,7 +307,7 @@
 
             const randomZ = (Math.random() - 0.5) * 150; // random side
             const startY = 30;
-            const startX = spaceship.position.x + 150;   // spawn ahead of ship
+            const startX = spaceship.position.x + 350;   // spawn ahead of ship
 
             asteroid.position.set(startX, startY, randomZ);
 
@@ -360,45 +360,41 @@
         scene.add(spaceSphere);
 
 
-        // === STARFIELD (Stars with lights) ===
-        const starCount = 50; // Number of stars
-        const stars = [];     // Array to hold star objects (mesh + light)
-        const settings = {
-            sunIntensity: sunLight.intensity,
-            starIntensity: 0.2,
-            sunScale: 1,
-            sunSpeed: 0.01
-        };
+       // === STARFIELD (Stars only, no extra lights) ===
+const starCount = 400;
+const stars = [];     
+const settings = {
+    sunIntensity: sunLight.intensity,
+    starIntensity: 0.8,
+    sunScale: 1,
+    sunSpeed: 0.01
+};
 
-        function randFloatSpread(range) {
-            return (Math.random() - 0.5) * range; // Helper function for random position
-        }
+function randFloatSpread(range) {
+    return (Math.random() - 0.5) * range;
+}
 
-        for (let i = 0; i < starCount; i++) {
-            const starGeometry = new THREE.SphereGeometry(0.5, 8, 8); // Tiny star
-            const starMaterial = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
-                emissive: 0xffffff,
-                emissiveIntensity: settings.starIntensity,
-                roughness: 1,
-                metalness: 0
-            });
-            const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+for (let i = 0; i < starCount; i++) {
+    const starGeometry = new THREE.SphereGeometry(1, 8, 8);
+    const starMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: settings.starIntensity,
+        roughness: 1,
+        metalness: 0
+    });
+    const starMesh = new THREE.Mesh(starGeometry, starMaterial);
 
-            // Random position within a cube of space
-            const x = randFloatSpread(300); // range -150 to 150
-            const y = randFloatSpread(200) + 20; // keep them mostly above
-            const z = randFloatSpread(300);
+    const x = randFloatSpread(900);
+    const y = randFloatSpread(900);
+    const z = randFloatSpread(900);
 
-            starMesh.position.set(x, y, z);
-            scene.add(starMesh);
+    starMesh.position.set(x, y, z);
+    scene.add(starMesh);
 
-            // Attach a small point light to the star
-            const starLight = new THREE.PointLight(0xffffff, 0.2, 50);
-            starLight.position.copy(starMesh.position);
-            scene.add(starLight);
-            stars.push({ mesh: starMesh, light: starLight, material: starMaterial });
-        }
+    stars.push({ mesh: starMesh, material: starMaterial });
+}
+
 
         // === GUI ===
         const gui = new dat.GUI();
@@ -519,7 +515,7 @@
 
             // === Animate the Sun's orbit ===
             sunAngle += settings.sunSpeed;
-            const orbitRadius = 100;
+            const orbitRadius = 150;
             const centerX = 100;
             const centerZ = 0;
 
