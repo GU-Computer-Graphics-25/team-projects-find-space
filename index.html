@@ -265,6 +265,8 @@
         scene.add(spaceship);
 
         // === ASTEROIDS ===
+        let asteroids = [];
+        let canSpawn = true;
 
         function createAsteroid(radius = 5, detail = 1) {
             const geometry = new THREE.IcosahedronGeometry(radius, detail);
@@ -291,19 +293,14 @@
             return new THREE.Mesh(geometry, material);
         }
 
-
-
-        let asteroids = [];
-        let canSpawn = true;
-
         function spawnAsteroid() {
             if (!canSpawn) return;
 
             const asteroid = createAsteroid(3, 1);
 
-            const randomZ = (Math.random() - 0.5) * 150; // random side to side (-75 to +75)
-            const startY = 30; // height
-            const startX = spaceship.position.x + 150; // SPAWN IN FRONT!!
+            const randomZ = (Math.random() - 0.5) * 150; // side to side
+            const startY = 30;
+            const startX = spaceship.position.x + 150;
 
             asteroid.position.set(startX, startY, randomZ);
 
@@ -313,8 +310,11 @@
                 spaceship.position.z
             );
 
+            // Precompute direction vector
+            const direction = new THREE.Vector3().subVectors(targetPosition, asteroid.position).normalize();
+
             asteroid.userData = {
-                target: targetPosition,
+                direction: direction, // <== save this!
                 speed: 0.5
             };
 
@@ -324,6 +324,7 @@
             canSpawn = false;
             setTimeout(() => { canSpawn = true; }, 1500);
         }
+
 
 
 
@@ -505,11 +506,18 @@
 
             // Move all asteroids
             asteroids.forEach(asteroid => {
-                const target = asteroid.userData.target;
-                const direction = new THREE.Vector3().subVectors(target, asteroid.position).normalize();
-
-                asteroid.position.add(direction.multiplyScalar(asteroid.userData.speed));
+                asteroid.position.add(asteroid.userData.direction.clone().multiplyScalar(asteroid.userData.speed));
             });
+
+            //remove asteroids when out of sight
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                const asteroid = asteroids[i];
+                if (asteroid.position.x < spaceship.position.x - 200) {
+                    // If asteroid is way behind the ship (200 units past), remove it
+                    scene.remove(asteroid);
+                    asteroids.splice(i, 1);
+                }
+            }
 
             // Update Camera Position based on the selected view
             if (!orbitalControl) {
