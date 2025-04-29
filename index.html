@@ -72,11 +72,13 @@
         const wingTexture = textureLoader.load('wings-texture.jpg');
         const noseTexture = textureLoader.load('texture-of-tank-side-wall-made-of-metal-and-reinforced-with-a-multitude-of-bolts-and-rivets-photo (1).jpg');
         const asteroidTexture = textureLoader.load('ast.jpg');
+        const spaceTexture = textureLoader.load('galaxy.jpg');
 
 
 
-        const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
-        scene.add(light);
+
+        //   const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
+        //   scene.add(light);
 
         // ---------------------- OBJECTs GENERATION --------------------- //
 
@@ -115,7 +117,9 @@
         const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeDepth);
         const planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x800080,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0
         });
 
         const playArea = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -341,8 +345,19 @@
             setTimeout(() => { canSpawn = true; }, 1500); // 1.5 sec cooldown
         }
 
+          // === SKY BOX ===
 
+        // Create a giant sphere that surrounds everything
+        const spaceGeometry = new THREE.SphereGeometry(500, 64, 64);
+        const spaceMaterial = new THREE.MeshBasicMaterial({
+            map: spaceTexture,
+            side: THREE.BackSide, //render inside of sphere
+            color: new THREE.Color(0x222222) // dark grey multiplier
 
+        });
+
+        const spaceSphere = new THREE.Mesh(spaceGeometry, spaceMaterial);
+        scene.add(spaceSphere);
 
 
         // === STARFIELD (Stars with lights) ===
@@ -534,6 +549,10 @@
                     asteroids.splice(i, 1);
                 }
             }
+
+            // Sky box rotation
+            spaceSphere.rotation.y += 0.0001; 
+
 
             // Update Camera Position based on the selected view
             if (!orbitalControl) {
