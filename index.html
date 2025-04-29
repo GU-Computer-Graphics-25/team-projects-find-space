@@ -345,7 +345,7 @@
             setTimeout(() => { canSpawn = true; }, 1500); // 1.5 sec cooldown
         }
 
-          // === SKY BOX ===
+        // === SKY BOX ===
 
         // Create a giant sphere that surrounds everything
         const spaceGeometry = new THREE.SphereGeometry(500, 64, 64);
@@ -360,40 +360,141 @@
         scene.add(spaceSphere);
 
 
-       // === STARFIELD (Stars only, no extra lights) ===
-const starCount = 400;
-const stars = [];     
-const settings = {
-    sunIntensity: sunLight.intensity,
-    starIntensity: 0.8,
-    sunScale: 1,
-    sunSpeed: 0.01
-};
+        // === STARFIELD (Stars only, no extra lights) ===
+        const starCount = 400;
+        const stars = [];
+        const settings = {
+            sunIntensity: sunLight.intensity,
+            starIntensity: 0.8,
+            sunScale: 1,
+            sunSpeed: 0.01
+        };
 
-function randFloatSpread(range) {
-    return (Math.random() - 0.5) * range;
-}
+        function randFloatSpread(range) {
+            return (Math.random() - 0.5) * range;
+        }
 
-for (let i = 0; i < starCount; i++) {
-    const starGeometry = new THREE.SphereGeometry(1, 8, 8);
-    const starMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        emissive: 0xffffff,
-        emissiveIntensity: settings.starIntensity,
-        roughness: 1,
-        metalness: 0
-    });
-    const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+        for (let i = 0; i < starCount; i++) {
+            const starGeometry = new THREE.SphereGeometry(1, 8, 8);
+            const starMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                emissive: 0xffffff,
+                emissiveIntensity: settings.starIntensity,
+                roughness: 1,
+                metalness: 0
+            });
+            const starMesh = new THREE.Mesh(starGeometry, starMaterial);
 
-    const x = randFloatSpread(900);
-    const y = randFloatSpread(900);
-    const z = randFloatSpread(900);
+            const x = randFloatSpread(900);
+            const y = randFloatSpread(900);
+            const z = randFloatSpread(900);
 
-    starMesh.position.set(x, y, z);
-    scene.add(starMesh);
+            starMesh.position.set(x, y, z);
+            scene.add(starMesh);
 
-    stars.push({ mesh: starMesh, material: starMaterial });
-}
+            stars.push({ mesh: starMesh, material: starMaterial });
+        }
+
+        // ===== Planet generation ====
+        function createPlanet(x, y, z) {
+            const planetGroup = new THREE.Group();
+
+            // Core sphere of the planet
+            const planetGeometry = new THREE.SphereGeometry(10, 32, 32);
+            const planetMaterial = new THREE.MeshStandardMaterial({
+                color: 0x222222,
+                emissive: 0x111111,
+                roughness: 1,
+                metalness: 0.5
+            });
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            planetGroup.add(planet);
+
+            // Pick a random color for this planet's rings and particles
+            const colorOptions = [0xffaa00, 0x00aaff, 0xaa00ff, 0xff5555, 0x55ff55];
+            const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+
+            // Glowing ring around the planet
+            const planetRingGeometry = new THREE.RingGeometry(14, 18, 64);
+            const planetRingMaterial = new THREE.MeshBasicMaterial({
+                color: randomColor,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.5
+            });
+            const planetRing = new THREE.Mesh(planetRingGeometry, planetRingMaterial);
+            planetRing.rotation.x = Math.PI / 2;
+            planetGroup.add(planetRing);
+
+            // Swirling mini-particles (matching color)
+            const particleGroup = new THREE.Group();
+            const swirlParticleCount = 100;
+            const swirlRadiusMin = 18;
+            const swirlRadiusMax = 24;
+
+            for (let i = 0; i < swirlParticleCount; i++) {
+                const particleGeometry = new THREE.SphereGeometry(0.2, 6, 6);
+                const particleMaterial = new THREE.MeshBasicMaterial({
+                    color: randomColor, // <== match planet ring color
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+                const angle = Math.random() * Math.PI * 2;
+                const radius = swirlRadiusMin + Math.random() * (swirlRadiusMax - swirlRadiusMin);
+
+                particle.userData = {
+                    angle: angle,
+                    radius: radius,
+                    speed: 0.005 + Math.random() * 0.01
+                };
+
+                particle.position.set(
+                    radius * Math.cos(angle),
+                    0,
+                    radius * Math.sin(angle)
+                );
+
+                particleGroup.add(particle);
+            }
+
+            planetGroup.add(particleGroup);
+
+            // Set position of the entire planet group
+            planetGroup.position.set(x, y, z);
+
+            // Attach particle group for animation
+            planetGroup.userData = {
+                particleGroup: particleGroup
+            };
+
+            scene.add(planetGroup);
+
+            return planetGroup;
+        }
+
+
+        const planets = [];
+
+        function spawnPlanets() {
+            for (let i = 0; i < 10; i++) {
+                let x, y, z;
+
+                do {
+                    x = randFloatSpread(900);
+                    y = randFloatSpread(900);
+                    z = randFloatSpread(900);
+
+                    // Make sure planets are not too close to the play area
+                } while (Math.abs(x) < 200 && Math.abs(z) < 200);
+
+                const planet = createPlanet(x, y, z);
+                planets.push(planet);
+            }
+        }
+        spawnPlanets();
+
 
 
         // === GUI ===
@@ -547,7 +648,7 @@ for (let i = 0; i < starCount; i++) {
             }
 
             // Sky box rotation
-            spaceSphere.rotation.y += 0.0001; 
+            spaceSphere.rotation.y += 0.0001;
 
 
             // Update Camera Position based on the selected view
@@ -579,6 +680,27 @@ for (let i = 0; i < starCount; i++) {
             }
             currentTilt += (targetTilt - currentTilt) * tiltSpeed;
             spaceship.rotation.x = currentTilt;
+
+            // Animate planet particle rings
+            planets.forEach(planet => {
+                const particleGroup = planet.userData.particleGroup;
+                particleGroup.children.forEach(particle => {
+                    particle.userData.angle += particle.userData.speed;
+
+                    const radius = particle.userData.radius;
+                    const angle = particle.userData.angle;
+
+                    particle.position.set(
+                        radius * Math.cos(angle),
+                        0,
+                        radius * Math.sin(angle)
+                    );
+                });
+
+                // Spin the whole ring slowly
+                planet.children[1].rotation.z += 0.001; // assuming ring is second child
+            });
+
 
             // Update camera based on current view
             if (!orbitalControl) {
