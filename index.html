@@ -71,6 +71,8 @@
         const bodyTexture = textureLoader.load('texture-of-tank-side-wall-made-of-metal-and-reinforced-with-a-multitude-of-bolts-and-rivets-photo (1).jpg');
         const wingTexture = textureLoader.load('wings-texture.jpg');
         const noseTexture = textureLoader.load('texture-of-tank-side-wall-made-of-metal-and-reinforced-with-a-multitude-of-bolts-and-rivets-photo (1).jpg');
+        const asteroidTexture = textureLoader.load('ast.jpg');
+
 
 
         const light = new THREE.AmbientLight(0xffffff, 1); // white light, strong
@@ -107,8 +109,8 @@
         scene.add(sunLight);
 
         // === PURPLE PLAY AREA (Flat face for visual guide) ===
-        const planeWidth = 110;
-        const planeDepth = 60;
+        const planeWidth = 150;
+        const planeDepth = 200;
 
         const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeDepth);
         const planeMaterial = new THREE.MeshStandardMaterial({
@@ -261,6 +263,36 @@
         // Add spaceship to scene
         scene.add(spaceship);
 
+        // === ASTEROIDS ===
+
+        function createAsteroid(radius = 5, detail = 1) {
+            const geometry = new THREE.IcosahedronGeometry(radius, detail);
+
+            const displacementStrength = 1;
+
+            for (let i = 0; i < geometry.vertices.length; i++) {
+                const vertex = geometry.vertices[i];
+
+                vertex.x += (Math.random() - 0.5) * displacementStrength;
+                vertex.y += (Math.random() - 0.5) * displacementStrength;
+                vertex.z += (Math.random() - 0.5) * displacementStrength;
+            }
+
+            geometry.computeFlatVertexNormals(); // recalculate normals for correct lighting
+
+            const material = new THREE.MeshStandardMaterial({
+                roughness: 1,
+                map: asteroidTexture,
+                metalness: 0.2
+
+            });
+
+            return new THREE.Mesh(geometry, material);
+        }
+
+        const asteroid = createAsteroid(5, 2); // radius 5, detail level 2
+        asteroid.position.set(50, 10, 20); // place it somewhere fun
+        scene.add(asteroid);
 
 
         // === STARFIELD (Stars with lights) ===
@@ -439,11 +471,17 @@
             }
 
             const moveSpeed = 0.5;
+            const halfPlaneDepth = 100;
+
             if (moveLeft) {
-                spaceship.position.z -= moveSpeed;
+                if (spaceship.position.z - moveSpeed > -halfPlaneDepth) {
+                    spaceship.position.z -= moveSpeed;
+                }
             }
             if (moveRight) {
-                spaceship.position.z += moveSpeed;
+                if (spaceship.position.z + moveSpeed < halfPlaneDepth) {
+                    spaceship.position.z += moveSpeed;
+                }
             }
 
             // Tilt spaceship
