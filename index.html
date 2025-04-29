@@ -123,6 +123,7 @@
         playArea.position.y = 0;
         scene.add(playArea);
 
+
         // === SPACESHIP BASE ===
 
         // Create a group to hold the spaceship parts
@@ -290,9 +291,41 @@
             return new THREE.Mesh(geometry, material);
         }
 
-        const asteroid = createAsteroid(5, 2); // radius 5, detail level 2
-        asteroid.position.set(50, 10, 20); // place it somewhere fun
-        scene.add(asteroid);
+
+
+        let asteroids = [];
+        let canSpawn = true;
+
+        function spawnAsteroid() {
+            if (!canSpawn) return;
+
+            const asteroid = createAsteroid(3, 1);
+
+            const randomZ = (Math.random() - 0.5) * 150; // random side to side (-75 to +75)
+            const startY = 30; // height
+            const startX = spaceship.position.x + 150; // SPAWN IN FRONT!!
+
+            asteroid.position.set(startX, startY, randomZ);
+
+            const targetPosition = new THREE.Vector3(
+                spaceship.position.x,
+                spaceship.position.y,
+                spaceship.position.z
+            );
+
+            asteroid.userData = {
+                target: targetPosition,
+                speed: 0.5
+            };
+
+            scene.add(asteroid);
+            asteroids.push(asteroid);
+
+            canSpawn = false;
+            setTimeout(() => { canSpawn = true; }, 1500);
+        }
+
+
 
 
         // === STARFIELD (Stars with lights) ===
@@ -464,6 +497,19 @@
 
             sunMesh.position.set(sunX, sunY, sunZ);
             sunLight.position.copy(sunMesh.position);
+
+            // Randomly decide to spawn asteroid
+            if (Math.random() < 0.01) { // about 1% chance each frame
+                spawnAsteroid();
+            }
+
+            // Move all asteroids
+            asteroids.forEach(asteroid => {
+                const target = asteroid.userData.target;
+                const direction = new THREE.Vector3().subVectors(target, asteroid.position).normalize();
+
+                asteroid.position.add(direction.multiplyScalar(asteroid.userData.speed));
+            });
 
             // Update Camera Position based on the selected view
             if (!orbitalControl) {
