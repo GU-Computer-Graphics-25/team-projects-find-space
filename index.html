@@ -278,6 +278,7 @@
 
         // === ASTEROIDS ===
         let asteroids = [];
+        let asteroidHitboxes = [];
         let canSpawn = true;
 
         function createAsteroid(radius = 4, detail = 1) {
@@ -333,6 +334,14 @@
             };
 
             scene.add(asteroid);
+            // Create red wireframe hitbox for this asteroid
+            const bbox = new THREE.Box3().setFromObject(asteroid);
+            const helper = new THREE.Box3Helper(bbox, 0xff0000); // red
+            scene.add(helper);
+
+            // Store for tracking/updating/removal
+            asteroidHitboxes.push({ asteroid, bbox, helper });
+
             asteroids.push(asteroid);
         }
 
@@ -674,12 +683,25 @@
                 asteroid.position.add(asteroid.userData.direction.clone().multiplyScalar(asteroid.userData.speed));
             });
 
+            // Update hitboxes to follow asteroids
+            asteroidHitboxes.forEach(obj => {
+                obj.bbox.setFromObject(obj.asteroid);
+            });
+
+
             // Remove out-of-view asteroids
             for (let i = asteroids.length - 1; i >= 0; i--) {
                 const asteroid = asteroids[i];
                 if (asteroid.position.x < spaceship.position.x - 200) {
                     scene.remove(asteroid);
                     asteroids.splice(i, 1);
+
+                    // Also remove corresponding hitbox helper
+                    const hitboxIndex = asteroidHitboxes.findIndex(h => h.asteroid === asteroid);
+                    if (hitboxIndex !== -1) {
+                        scene.remove(asteroidHitboxes[hitboxIndex].helper);
+                        asteroidHitboxes.splice(hitboxIndex, 1);
+                    }
                 }
             }
 
