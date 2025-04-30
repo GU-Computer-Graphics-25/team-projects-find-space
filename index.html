@@ -360,11 +360,25 @@
 
 
         function createOneAsteroid(offsetZ = 0) {
-            // 10% chance to create a BIG asteroid
-            const isBig = Math.random() < 0.1;
 
-            const size = isBig ? 8 : 4;       // big = 8, normal = 4
-            const speed = isBig ? 0.2 : 1;     // big = slow, normal = fast
+            // Randomly decide size and speed
+            const rand = Math.random();
+            let size, speed;
+
+            if (rand < 0.1) {
+                // 10% chance for big
+                size = 8;
+                speed = 0.2;
+            } else if (rand < 0.4) {
+                // 30% chance for small
+                size = 2;   // half the size of regular
+                speed = 3;  // 3x the speed of regular
+            } else {
+                // 60% chance for regular
+                size = 4;
+                speed = 1;
+            }
+
 
             const asteroid = createAsteroid(size, 1); // << your createAsteroid(radius, detail) function
 
