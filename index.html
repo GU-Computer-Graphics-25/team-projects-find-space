@@ -57,6 +57,72 @@
             color: #ffffff;
             border-color: #ffffff;
         }
+
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 60px;
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+        }
+
+        #startButton {
+            margin-top: 30px;
+            padding: 16px 32px;
+            font-size: 22px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #111122;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #startButton:hover {
+            background-color: #222233;
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        #minimizeStart {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            color: #00ffff;
+            cursor: pointer;
+        }
+
+        #reopenStart {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 24px;
+            color: #00ffff;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 14px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            cursor: pointer;
+            display: none;
+        }
+
+        #scoreDisplay {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 24px;
+            color: #00ffff;
+            font-family: 'Courier New', Courier, monospace;
+            z-index: 10;
+        }
     </style>
 
     <!-- Core Libraries -->
@@ -75,6 +141,15 @@
         <p>Lost in Space...</p>
         <button id="tryAgainButton">Try Again</button>
     </div>
+    <div id="startScreen">
+        <div id="minimizeStart" title="Minimize">✖</div>
+        <h1 style="color: white; font-family: 'Courier New'; font-size: 50px;">🌌 SPACE RUN 🌌</h1>
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <div id="reopenStart" title="Open Menu">☰</div>
+    <div id="scoreDisplay">Score: 0</div>
+
     <script>
 
         // Camera Positions
@@ -111,6 +186,9 @@
         let reactorGlow = 0.2; // initial glow
         let targetGlow = 0.2;
         let gameOver = false;
+        let score = 0;
+        const scoreDisplay = document.getElementById('scoreDisplay');
+
 
 
 
@@ -592,7 +670,20 @@
         scene.add(helper);
         helper.visible = false; // hide by default
 
+        //MENUS
+        const startScreen = document.getElementById('startScreen');
+        const minimizeStart = document.getElementById('minimizeStart');
+        const reopenStart = document.getElementById('reopenStart');
 
+        minimizeStart.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            reopenStart.style.display = 'block';
+        });
+
+        reopenStart.addEventListener('click', () => {
+            startScreen.style.display = 'block';
+            reopenStart.style.display = 'none';
+        });
 
 
         // === GUI ===
@@ -768,7 +859,7 @@
             sunLight.position.copy(sunMesh.position);
 
             // Randomly decide to spawn asteroid
-            if (Math.random() < 0.05) {
+            if (gameStarted && Math.random() < 0.05) {
                 spawnAsteroid();
             }
 
@@ -786,11 +877,18 @@
             // Remove out-of-view asteroids
             for (let i = asteroids.length - 1; i >= 0; i--) {
                 const asteroid = asteroids[i];
-                if (asteroid.position.x < spaceship.position.x - 200) {
+                if (asteroid.position.x < spaceship.position.x - 5) {
+                    // Asteroid has safely passed
+
+                    // Increase score
+                    score += 500;
+                    scoreDisplay.textContent = `Score: ${score}`;
+
+                    // Remove asteroid
                     scene.remove(asteroid);
                     asteroids.splice(i, 1);
 
-                    // Also remove corresponding hitbox helper
+                    // Remove hitbox
                     const hitboxIndex = asteroidHitboxes.findIndex(h => h.asteroid === asteroid);
                     if (hitboxIndex !== -1) {
                         scene.remove(asteroidHitboxes[hitboxIndex].helper);
@@ -798,6 +896,7 @@
                     }
                 }
             }
+
 
             // Skybox rotation
             spaceSphere.rotation.y += 0.0001;
@@ -860,6 +959,13 @@
             controls.update();
             renderer.render(scene, camera);
         }
+
+        let gameStarted = false;
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('startScreen').style.display = 'none';
+            gameStarted = true;
+        });
 
         animate();
         document.getElementById('tryAgainButton').addEventListener('click', () => {
