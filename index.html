@@ -750,6 +750,14 @@
             });
         });
 
+        // === TIMER VISIBILITY TOGGLE ===
+        const timerSettings = { showTimer: true };
+        gui.add(timerSettings, 'showTimer')
+        .name("Show Timer")
+        .onChange((visible) => {
+            timerDisplay.style.display = visible ? 'block' : 'none';
+        });
+
 
         // Camera Position Switch Variables
         let cameraPosition = 'thirdPerson';
