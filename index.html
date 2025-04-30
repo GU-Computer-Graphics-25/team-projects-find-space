@@ -123,6 +123,16 @@
             font-family: 'Courier New', Courier, monospace;
             z-index: 10;
         }
+
+        #timerDisplay {
+        position: absolute;
+        top: 20px;
+        left: 200px;
+        font-size: 24px;
+        color: #00ffff;
+        font-family: 'Courier New', Courier, monospace;
+        z-index: 10;
+    }
     </style>
 
     <!-- Core Libraries -->
@@ -149,6 +159,7 @@
 
     <div id="reopenStart" title="Open Menu">☰</div>
     <div id="scoreDisplay">Score: 0</div>
+    <div id="timerDisplay">Time: 0.00s</div>
 
     <script>
 
@@ -188,6 +199,8 @@
         let gameOver = false;
         let score = 0;
         const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        let startTime = null;
 
 
 
@@ -955,7 +968,12 @@
 
                 planet.children[1].rotation.z += 0.001;
             });
-
+            
+            if (gameStarted && !gameOver && startTime !== null) {
+                const now = performance.now();
+                const elapsed = (now - startTime) / 1000;
+                timerDisplay.textContent = `Time: ${elapsed.toFixed(2)}s`;
+            }
             controls.update();
             renderer.render(scene, camera);
         }
@@ -965,6 +983,7 @@
         document.getElementById('startButton').addEventListener('click', () => {
             document.getElementById('startScreen').style.display = 'none';
             gameStarted = true;
+            startTime = performance.now();
         });
 
         animate();
